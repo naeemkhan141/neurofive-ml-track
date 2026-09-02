@@ -13,3 +13,14 @@ Trained a Logistic Regression model using scikit-learn to predict passenger surv
 - Evaluated using accuracy score and confusion matrix
 
 **Result:** Achieved 81% accuracy on the test set.
+
+## Week 3: Model Evaluation & Tuning
+
+Added precision, recall, and F1-score evaluation using classification_report.
+Used GridSearchCV to tune hyperparameters (C, max_iter).
+
+**Best Parameters:** C=0.1, max_iter=500
+**Original Accuracy:** 0.81
+**Tuned Accuracy:** 0.8212
+
+Tuning gave a small (~1%) accuracy improvement, showing the default settings were already reasonably good.
