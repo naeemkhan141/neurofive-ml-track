@@ -23,4 +23,7 @@ Used GridSearchCV to tune hyperparameters (C, max_iter).
 **Original Accuracy:** 0.81
 **Tuned Accuracy:** 0.8212
 
+## Week 3: Customer Churn Prediction — Working with a Business Problem
+Analyzed telecom customer data to predict churn. Top factors: tenure, MonthlyCharges, TotalCharges. Compared Logistic Regression (82% accuracy) vs Decision Tree (77% accuracy). Business use: identify high-risk customers early for retention offers.
+
 Tuning gave a small (~1%) accuracy improvement, showing the default settings were already reasonably good.
