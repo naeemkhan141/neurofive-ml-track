@@ -27,3 +27,6 @@ Used GridSearchCV to tune hyperparameters (C, max_iter).
 Analyzed telecom customer data to predict churn. Top factors: tenure, MonthlyCharges, TotalCharges. Compared Logistic Regression (82% accuracy) vs Decision Tree (77% accuracy). Business use: identify high-risk customers early for retention offers.
 
 Tuning gave a small (~1%) accuracy improvement, showing the default settings were already reasonably good.
+
+## Week 4: Build a Proper ML Pipeline with Feature Engineering
+Built a scikit-learn Pipeline using ColumnTransformer (StandardScaler for numerical, OneHotEncoder for categorical) chained with Logistic Regression — achieved 82.19% accuracy, matching the manual approach. Tested 2 new engineered features (AvgMonthlySpend, IsNewCustomer) but they slightly reduced accuracy (81.48%), showing existing features already captured that signal. Final pipeline saved with joblib for reuse.
