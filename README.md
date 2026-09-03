@@ -40,3 +40,13 @@ Trained Random Forest (79.21% accuracy) and XGBoost (79.84% accuracy) on the chu
 | Decision Tree | Accuracy | 77% |
 | Random Forest | Accuracy | 79.21% |
 | XGBoost | Accuracy | 79.84% |
+
+## Week 5: Handling Imbalanced & Messy Real-World Data
+Churn dataset showed class imbalance (73.5% No Churn vs 26.5% Churn). Applied class_weight='balanced' in Logistic Regression to address it. Recall improved from 55.88% to 78.34% (catching far more actual churners), while accuracy dropped from 80.55% to 73.81% — showing accuracy alone was a misleading metric here, since a model that always predicts "No Churn" would score ~73% accuracy while being useless for identifying at-risk customers.
+
+| Metric | Before (Baseline) | After (Balanced) |
+|---|---|---|
+| Accuracy | 80.55% | 73.81% |
+| Precision | 65.72% | 50.43% |
+| Recall | 55.88% | 78.34% |
+| F1 Score | 60.40% | 61.36% |
