@@ -50,3 +50,8 @@ Churn dataset showed class imbalance (73.5% No Churn vs 26.5% Churn). Applied cl
 | Precision | 65.72% | 50.43% |
 | Recall | 55.88% | 78.34% |
 | F1 Score | 60.40% | 61.36% |
+
+## Week 5: Deploy Model as a Live Web App
+Deployed the churn prediction model as an interactive Streamlit web app, where users input tenure, monthly charges, and total charges to get a live churn risk prediction.
+
+**Live App:** https://naeem-churn-predictor.streamlit.app/
