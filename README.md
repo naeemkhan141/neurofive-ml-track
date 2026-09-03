@@ -30,3 +30,13 @@ Tuning gave a small (~1%) accuracy improvement, showing the default settings wer
 
 ## Week 4: Build a Proper ML Pipeline with Feature Engineering
 Built a scikit-learn Pipeline using ColumnTransformer (StandardScaler for numerical, OneHotEncoder for categorical) chained with Logistic Regression — achieved 82.19% accuracy, matching the manual approach. Tested 2 new engineered features (AvgMonthlySpend, IsNewCustomer) but they slightly reduced accuracy (81.48%), showing existing features already captured that signal. Final pipeline saved with joblib for reuse.
+
+## Week 4: Ensemble Learning — Random Forest vs XGBoost
+Trained Random Forest (79.21% accuracy) and XGBoost (79.84% accuracy) on the churn dataset, compared against Logistic Regression (82.19%) and Decision Tree (77%). Random Forest ranked numerical features (TotalCharges, tenure, MonthlyCharges) highest, while XGBoost prioritized categorical features (InternetService_Fiber optic, Contract_Month-to-month). Despite being more complex, both ensemble models underperformed the simpler Logistic Regression on this dataset — showing model complexity doesn't guarantee better results on smaller/simpler datasets.
+
+| Model | Metric | Score |
+|---|---|---|
+| Logistic Regression | Accuracy | 82.19% |
+| Decision Tree | Accuracy | 77% |
+| Random Forest | Accuracy | 79.21% |
+| XGBoost | Accuracy | 79.84% |
