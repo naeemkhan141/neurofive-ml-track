@@ -1,27 +1,62 @@
 import streamlit as st
 import joblib
 import pandas as pd
+import numpy as np
+import re
+from urllib.parse import urlparse
 
-# Saved model load karo
-model = joblib.load('simple_churn_model.pkl')
+# Model, scaler, aur feature columns load karo
+model = joblib.load('phishing_model.pkl')
+scaler = joblib.load('scaler.pkl')
+feature_cols = joblib.load('feature_columns.pkl')
 
-st.title("Customer Churn Predictor")
-st.write("Customer ki details daalo aur pata karo ke wo company chhod sakta hai ya nahi.")
+shortening_services = ['bit.ly', 'goo.gl', 'tinyurl', 't.co', 'ow.ly', 'is.gd', 'buff.ly']
+suspicious_keywords = ['login', 'verify', 'secure', 'account', 'bank', 'update',
+                        'confirm', 'signin', 'password', 'security']
 
-tenure = st.number_input("Tenure (kitne mahine se customer hai)", min_value=0, max_value=100, value=12)
-monthly_charges = st.number_input("Monthly Charges ($)", min_value=0.0, max_value=500.0, value=70.0)
-total_charges = st.number_input("Total Charges ($)", min_value=0.0, max_value=10000.0, value=1000.0)
+def extract_features(url):
+    features = {}
+    features['url_length'] = len(url)
+    features['num_dots'] = url.count('.')
+    features['num_hyphens'] = url.count('-')
+    features['num_at'] = url.count('@')
+    features['num_question'] = url.count('?')
+    features['num_equal'] = url.count('=')
+    features['num_underscore'] = url.count('_')
+    features['num_slash'] = url.count('/')
+    features['num_digits'] = sum(c.isdigit() for c in url)
+    features['has_ip'] = 1 if re.search(r'\d+\.\d+\.\d+\.\d+', url) else 0
+    features['has_https'] = 1 if 'https' in url else 0
+    features['has_http'] = 1 if 'http://' in url else 0
+    features['digit_ratio'] = features['num_digits'] / features['url_length'] if features['url_length'] > 0 else 0
+    url_lower = url.lower()
+    features['suspicious_keyword_count'] = sum(1 for kw in suspicious_keywords if kw in url_lower)
+    features['is_shortened'] = 1 if any(s in url_lower for s in shortening_services) else 0
+    try:
+        domain = urlparse(url if url.startswith('http') else 'http://' + url).netloc
+        features['num_subdomains'] = domain.count('.')
+    except:
+        features['num_subdomains'] = 0
+    features['url_length_log'] = np.log1p(features['url_length'])
+    return features
 
-if st.button("Predict"):
-    input_data = pd.DataFrame({
-        'tenure': [tenure],
-        'MonthlyCharges': [monthly_charges],
-        'TotalCharges': [total_charges]
-    })
-    prediction = model.predict(input_data)[0]
-    probability = model.predict_proba(input_data)[0][1]
+st.title("🔗 Malicious URL Detector")
+st.write("Koi bhi URL daalo aur pata karo ke wo safe hai ya malicious (phishing/malware/defacement).")
 
-    if prediction == 1:
-        st.error(f"⚠️ Ye customer churn kar sakta hai (Risk: {probability:.1%})")
+user_url = st.text_input("URL yahan daalo (jaise: bit.ly/xyz123 ya google.com)")
+
+if st.button("Check URL"):
+    if user_url.strip() == "":
+        st.warning("Pehle koi URL likho.")
     else:
-        st.success(f"✅ Ye customer likely stay karega (Risk: {probability:.1%})")
+        feats = extract_features(user_url)
+        input_df = pd.DataFrame([feats])[feature_cols]
+        input_scaled = scaler.transform(input_df)
+
+        prediction = model.predict(input_scaled)[0]
+        probability = model.predict_proba(input_scaled)[0][1]
+
+        if prediction == 1:
+            st.error(f"⚠️ Ye URL MALICIOUS ho sakta hai (Risk: {probability:.1%})")
+        else:
+            st.success(f"✅ Ye URL SAFE lagta hai (Risk: {probability:.1%})")
