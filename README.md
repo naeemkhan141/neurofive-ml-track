@@ -55,3 +55,36 @@ Churn dataset showed class imbalance (73.5% No Churn vs 26.5% Churn). Applied cl
 Deployed the churn prediction model as an interactive Streamlit web app, where users input tenure, monthly charges, and total charges to get a live churn risk prediction.
 
 **Live App:** https://naeem-churn-predictor.streamlit.app/
+
+## Week 6 Capstone: Malicious URL Detector
+
+### Problem Statement
+Phishing and malicious URLs are one of the most common cyberattack vectors, tricking users into visiting harmful sites disguised as legitimate ones. This project builds a machine learning model that can look at a raw URL and predict whether it's likely to be malicious (phishing/malware/defacement) or safe, without needing to actually visit the site.
+
+### Approach
+- Used a public dataset of 651,191 labeled URLs (benign, phishing, malware, defacement), sampled to a balanced 50,000 URLs for training
+- Converted the multi-class labels into a binary target: Benign vs Malicious
+- Extracted 17 lexical features directly from the URL text (no need to visit the site) — including URL length, number of special characters, digit ratio, presence of suspicious keywords (login, verify, secure), use of URL-shortening services, number of subdomains, and IP address detection
+- Trained and compared 3 models: Logistic Regression, Decision Tree, and Random Forest
+- Random Forest performed best and was selected as the final model
+
+### Results
+| Model | Accuracy | Precision | Recall | F1 |
+|---|---|---|---|---|
+| Logistic Regression | 83.58% | 90.47% | 74.91% | 81.96% |
+| Decision Tree | 91.84% | 92.33% | 91.18% | 91.75% |
+| Random Forest | 94.12% | 94.51% | 93.63% | 94.07% |
+
+The top predictive features were: presence of `http://` (non-secure), number of slashes in the URL, number of subdomains, and number of dots — matching real-world phishing patterns where attackers use long, complex-looking URLs to disguise malicious links.
+
+### Live App
+Users can paste any URL into the app and instantly get a Malicious/Safe prediction with a risk score.
+**Live App:** [link yahan aayega jab Streamlit deploy ho jaye]
+
+### How to Run
+1. Clone this repo
+2. `pip install -r requirements.txt`
+3. `streamlit run app.py`
+
+### Business Value
+This tool could be integrated into browsers, email clients, or messaging apps to warn users in real-time before they click a suspicious link — helping prevent credential theft, malware infections, and financial fraud, especially for less tech-savvy users who can't easily spot phishing attempts themselves.
