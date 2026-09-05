@@ -16,6 +16,9 @@ suspicious_keywords = ['login', 'verify', 'secure', 'account', 'bank', 'update',
 
 def extract_features(url):
     features = {}
+    url = url.replace('https://', '').replace('http://', '')
+    if url.startswith('www.'):
+        url = url[4:]
     features['url_length'] = len(url)
     features['num_dots'] = url.count('.')
     features['num_hyphens'] = url.count('-')
@@ -26,8 +29,6 @@ def extract_features(url):
     features['num_slash'] = url.count('/')
     features['num_digits'] = sum(c.isdigit() for c in url)
     features['has_ip'] = 1 if re.search(r'\d+\.\d+\.\d+\.\d+', url) else 0
-    features['has_https'] = 1 if 'https' in url else 0
-    features['has_http'] = 1 if 'http://' in url else 0
     features['digit_ratio'] = features['num_digits'] / features['url_length'] if features['url_length'] > 0 else 0
     url_lower = url.lower()
     features['suspicious_keyword_count'] = sum(1 for kw in suspicious_keywords if kw in url_lower)
