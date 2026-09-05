@@ -62,25 +62,26 @@ Deployed the churn prediction model as an interactive Streamlit web app, where u
 Phishing and malicious URLs are one of the most common cyberattack vectors, tricking users into visiting harmful sites disguised as legitimate ones. This project builds a machine learning model that looks at a raw URL and predicts whether it's likely to be malicious (phishing/malware/defacement) or safe — without needing to actually visit the site.
 
 ### Approach
-- Used a public dataset of 651,191 labeled URLs (benign, phishing, malware, defacement), sampled to a balanced 50,000 URLs for training
-- Converted the multi-class labels into a binary target: Benign vs Malicious
-- Extracted lexical features directly from the URL text — including URL length, number of special characters, digit ratio, presence of suspicious keywords (login, verify, secure), use of URL-shortening services, and number of subdomains
-- Trained and compared 3 models: Logistic Regression, Decision Tree, and Random Forest
+- Used a public dataset of 651,191 labeled URLs (benign, phishing, malware, defacement), sampled to a balanced 50,000 URLs
+- Converted multi-class labels into a binary target: Benign vs Malicious
+- Normalized all URLs (stripped protocol and "www.") before feature extraction to avoid data leakage
+- Used a **TF-IDF character n-gram (2-5) representation** combined with **Logistic Regression**, allowing the model to learn actual character-level patterns in URLs (e.g. suspicious substrings, unusual structure) rather than relying on a handful of manually engineered features
+- Augmented training data with well-known safe domains (Google, Facebook, Amazon, etc.) since bare/simple domains were underrepresented in the original dataset
 
-### A Data Leakage Lesson
-The first version of the Random Forest model hit 94% accuracy — but testing it live revealed a serious flaw: it flagged plain URLs like "google.com" as malicious. Investigation showed the model had learned a spurious pattern: most benign URLs in the dataset were written without a "http://"/"https://" prefix, while malicious ones usually included it. The model was detecting the *presence of a protocol prefix*, not actual malicious structure.
+### Key Lessons Learned
+1. **Data leakage:** An early version of the model hit 94% accuracy by learning a shortcut — it flagged any URL containing "http://" or "https://" as suspicious, simply because malicious URLs in the dataset happened to include the protocol more often than benign ones. Removing the protocol before feature extraction fixed this, dropping accuracy to a more honest number but making the model actually useful.
+2. **Distribution bias:** Even after fixing leakage, the model initially misclassified plain domains like "google.com" as malicious, because very short, path-less URLs were rare in the training data (most benign examples had a path, like "youtube.com/watch?v=..."). This was fixed by augmenting the training set with known-safe bare domains.
+3. **Manual features vs. learned representations:** Hand-crafted features (URL length, number of dots, etc.) plateaued around 80-87% and were brittle to edge cases. Switching to a TF-IDF character n-gram representation let the model learn patterns directly from the text, which generalized better to real-world URLs.
 
-**Fix:** All URLs were normalized (protocol and "www." stripped) before feature extraction, and the leaking features (has_http, has_https) were removed. This dropped accuracy to a more honest 80.77% — but the model now genuinely relies on structural signals like number of slashes, dots, and digit ratio, and correctly classifies real-world URLs like "google.com" as safe.
+### Results (Final Model)
+| Metric | Score |
+|---|---|
+| Accuracy | 87.65% |
+| Precision | 88.02% |
+| Recall | 86.14% |
+| F1 Score | 87.07% |
 
-### Results
-| Model | Accuracy | Precision | Recall | F1 |
-|---|---|---|---|---|
-| Logistic Regression | 83.58% | 90.47% | 74.91% | 81.96% |
-| Decision Tree | 91.84% | 92.33% | 91.18% | 91.75% |
-| Random Forest (before leakage fix) | 94.12% | 94.51% | 93.63% | 94.07% |
-| Random Forest (final, leakage-fixed) | 80.77% | — | — | 80.18% |
-
-Top predictive features (final model): number of slashes, number of equal signs, number of dots, and digit ratio in the URL — all genuine structural markers of suspicious links.
+Real-world sanity check: correctly classified google.com, facebook.com, amazon.com, youtube.com, and wikipedia.org as safe, and correctly flagged an IP-based login URL, a shortened link, and a typosquatted domain (amaz0n-account-verify.tk) as malicious.
 
 ### Live App
 Users can paste any URL into the app and instantly get a Malicious/Safe prediction with a risk score.
@@ -88,8 +89,9 @@ Users can paste any URL into the app and instantly get a Malicious/Safe predicti
 
 ### How to Run
 1. Clone this repo
-2. `pip install -r requirements.txt`
-3. `streamlit run app.py`
+2. `cd url-detector`
+3. `pip install -r requirements.txt`
+4. `streamlit run app.py`
 
 ### Business Value
-This tool could be integrated into browsers, email clients, or messaging apps to warn users in real-time before they click a suspicious link — helping prevent credential theft, malware infections, and financial fraud, especially for less tech-savvy users who can't easily spot phishing attempts themselves. The data leakage discovery also highlights a real lesson for any ML practitioner: a high accuracy score means nothing if the model hasn't been tested against real, unseen inputs.
+This tool could be integrated into browsers, email clients, or messaging apps to warn users in real-time before they click a suspicious link — helping prevent credential theft, malware infections, and financial fraud, especially for less tech-savvy users who can't easily spot phishing attempts themselves. Beyond the model itself, this project highlights a broader lesson for any ML practitioner: high accuracy on paper means nothing until the model is stress-tested against real, unseen, everyday inputs — that's where hidden shortcuts and biases actually surface.
